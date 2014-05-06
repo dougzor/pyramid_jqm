@@ -1,42 +1,48 @@
 # coding: utf-8
 
 from pkg_resources import get_distribution
-
+from pyramid.response import FileResponse
 from pyramid.httpexceptions import HTTPNotFound
-from pyramid.view import static_view
 from pyramid.view import view_config
-
-# www is a view for static files; it will be found when all other
-# views fail to be found (it's a NotFound view)
-www = static_view('{{package}}:static', cache_max_age=86400)
+import os
 
 cache_one_hour = 3600
 cache_one_day = 86400
 never_cache = 0
 
-@view_config(name='versions.json', renderer='json', http_cache=cache_one_hour)
+
+@view_config(route_name='index', http_cache=cache_one_hour,
+             request_method='GET')
+def index(request):
+    here = os.path.dirname(__file__)
+    icon = os.path.join(here, 'static', 'index.html')
+    return FileResponse(icon, request=request)
+
+@view_config(route_name='versions.json', renderer='json',
+             request_method='GET', http_cache=cache_one_hour)
 def versions(request):
     pjqm_dist = get_distribution('pyramid_jqm')
     pyramid_dist = get_distribution('pyramid')
     return {'pjqm_version':pjqm_dist.version,
             'pyramid_version':pyramid_dist.version}
 
-@view_config(name='countries.json', renderer='json', http_cache=cache_one_day)
+@view_config(route_name='countries.json', renderer='json',
+             request_method='GET', http_cache=cache_one_day)
 def countries(request):
     return countrylist
 
-@view_config(name='webframeworks.json', renderer='json',
-             http_cache=cache_one_day)
+@view_config(route_name='webframeworks.json', renderer='json',
+             http_cache=cache_one_day, request_method='GET')
 def webframeworks(crequest):
     return webframework_list
 
-@view_config(name='get_personalinfo.json', renderer='json',
-             http_cache=never_cache)
+@view_config(route_name='get_personalinfo.json', renderer='json',
+             http_cache=never_cache, request_method='GET')
 def get_personalinfo(request):
     return personalinfo
 
-@view_config(name='change_personalinfo.json', renderer='json',
-             http_cache=never_cache)
+@view_config(route_name='change_personalinfo.json', renderer='json',
+             http_cache=never_cache, request_method='GET')
 def change_personalinfo(request):
     data = request.json_body
     frameworks = []

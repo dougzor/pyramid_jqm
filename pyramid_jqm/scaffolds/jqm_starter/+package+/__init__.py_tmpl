@@ -1,12 +1,21 @@
 from pyramid.config import Configurator
-from {{package}}.views import www
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     config = Configurator(settings=settings)
     config.add_route('languages', '/language/{name}')
-    config.add_view(www, context='pyramid.httpexceptions.HTTPNotFound')
+    config.add_static_view(name='/static', path='{{package}}:static', cache_max_age=3600)
+
+    config.add_route('index', '/')
+    config.add_route('versions.json', '/versions.json')
+    config.add_route('countries.json', '/countries.json')
+    config.add_route('webframeworks.json', '/webframeworks.json')
+    config.add_route('get_personalinfo.json', '/get_personalinfo.json')
+    config.add_route('change_personalinfo.json', '/change_personalinfo.json')
+
+    config.include('pyramid_chameleon')
+
     config.scan('{{package}}')
     return config.make_wsgi_app()
 
